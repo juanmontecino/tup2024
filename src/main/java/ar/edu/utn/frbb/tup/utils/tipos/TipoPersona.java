@@ -1,4 +1,4 @@
-package ar.edu.utn.frbb.tup.model;
+package ar.edu.utn.frbb.tup.utils.tipos;
 
 public enum TipoPersona {
 
