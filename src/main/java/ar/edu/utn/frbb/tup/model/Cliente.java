@@ -1,17 +1,17 @@
-package ar.edu.utn.frbb.tup.utils;
+package ar.edu.utn.frbb.tup.model;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-
-import ar.edu.utn.frbb.tup.utils.tipos.TipoPersona;
+import java.util.Set;
 
 public class Cliente extends Persona{
 
     private TipoPersona tipoPersona;
     private String banco;
     private LocalDate fechaAlta;
-    private List<Cuenta> cuentas = new ArrayList<>();
+    private Set<Cuenta> cuentas = new HashSet<>();
 
     public TipoPersona getTipoPersona() {
         return tipoPersona;
@@ -37,25 +37,31 @@ public class Cliente extends Persona{
         this.fechaAlta = fechaAlta;
     }
 
-    public List<Cuenta> getCuentas() {
+    public Set<Cuenta> getCuentas() {
         return cuentas;
     }
-    
-    public Cuenta existeCuenta(int idComparar){
-        for (Cuenta cuenta : cuentas) {
-            if (cuenta.getIdCuenta() == idComparar) {
-                return cuenta;
+
+    public void addCuenta(Cuenta cuenta) {
+        this.cuentas.add(cuenta);
+        cuenta.setTitular(this);
+    }
+
+    public boolean tieneCuenta(TipoCuenta tipoCuenta, TipoMoneda moneda) {
+        for (Cuenta cuenta:cuentas) {
+            if (tipoCuenta.equals(cuenta.getTipoCuenta()) && moneda.equals(cuenta.getMoneda())) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     @Override
     public String toString() {
-        return "Cliente [getNombre()=" + getNombre() + ", getApellido()=" + getApellido() + ", getDni()=" + getDni()
-                + ", getCuentas()=" + getCuentas() + "]";
+        return "Cliente{" +
+                "tipoPersona=" + tipoPersona +
+                ", banco='" + banco + '\'' +
+                ", fechaAlta=" + fechaAlta +
+                ", cuentas=" + cuentas +
+                '}';
     }
-
-
-    
 }
