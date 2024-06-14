@@ -31,10 +31,13 @@ public class CuentaServiceTest {
     private CuentaDao cuentaDao;
 
     @Mock
-    private ClienteService clienteService;
+    private ClienteDao clienteDao;
 
     @Mock
-    private ClienteDao clienteDao;
+    private ClienteService clienteServiceMock;
+
+    @InjectMocks
+    private ClienteService clienteService;
 
     @InjectMocks
     private CuentaService cuentaService;
@@ -44,36 +47,25 @@ public class CuentaServiceTest {
         MockitoAnnotations.openMocks(this);
     }
 
-    private Cliente CrearCliente() throws ClienteAlreadyExistsException {
-        Cliente pepeRino = new Cliente();
-        pepeRino.setDni(26456439);
-        pepeRino.setNombre("Pepe");
-        pepeRino.setApellido("Rino");
-        pepeRino.setFechaNacimiento(LocalDate.of(1978, 3,25));
-        pepeRino.setTipoPersona(TipoPersona.PERSONA_FISICA);
-        clienteService.darDeAltaCliente(pepeRino);
-        return pepeRino;
-    }
-
-
     @Test
     public void testDarDeAltaCuentaSuccess() throws TipoCuentaAlreadyExistsException, CuentaAlreadyExistsException, TipoDeCuentaNoSoportadaException {
-        // Creamos una cuenta válida
         Cuenta cuentaValida = new Cuenta();
         cuentaValida.setNumeroCuenta(123456789);
         cuentaValida.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
         cuentaValida.setMoneda(TipoMoneda.PESOS);
 
+        Cliente cliente = new Cliente();
+        cliente.setDni(12345678);
+
         // Configuramos los mocks para que no lancen excepciones
-        when(cuentaDao.find(123456789)).thenReturn(null);//simula que la cuenta no existe
-        doNothing().when(clienteService).agregarCuenta(cuentaValida, 12345678); //simula que el cliente no tiene una cuenta de ese tipo y moneda.
+        when(cuentaDao.find(123456789)).thenReturn(null); // Simula que la cuenta no existe
+        doNothing().when(clienteServiceMock).agregarCuenta(cuentaValida, 12345678); // Simula que el cliente no tiene una cuenta de ese tipo y moneda
 
         // Llamamos al método darDeAltaCuenta
         cuentaService.darDeAltaCuenta(cuentaValida, 12345678);
 
         // Verificamos que se hayan llamado a los métodos correspondientes
-        verify(cuentaDao, times(1)).find(123456789);
-        verify(clienteService, times(1)).agregarCuenta(cuentaValida, 12345678);
+        verify(clienteServiceMock, times(1)).agregarCuenta(cuentaValida, 12345678);
         verify(cuentaDao, times(1)).save(cuentaValida);
     }
 
@@ -112,7 +104,7 @@ public class CuentaServiceTest {
         cliente.addCuenta(cuentaValida);
 
         // Configurar el mock para devolver el cliente con la cuenta válida
-        when(clienteService.buscarClientePorDni(123456789)).thenReturn(cliente);
+        when(clienteDao.find(123456789, true)).thenReturn(cliente);
 
         // Intentar agregar la cuenta duplicada y verificar la excepción
         Cuenta cuentaDuplicada = new Cuenta();
@@ -122,4 +114,5 @@ public class CuentaServiceTest {
 
         assertThrows(TipoCuentaAlreadyExistsException.class, () -> clienteService.agregarCuenta(cuentaDuplicada, 123456789));
     }
+
 }
