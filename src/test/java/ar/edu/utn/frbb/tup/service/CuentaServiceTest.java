@@ -54,9 +54,6 @@ public class CuentaServiceTest {
         cuentaValida.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
         cuentaValida.setMoneda(TipoMoneda.PESOS);
 
-        Cliente cliente = new Cliente();
-        cliente.setDni(12345678);
-
         // Configuramos los mocks para que no lancen excepciones
         when(cuentaDao.find(123456789)).thenReturn(null); // Simula que la cuenta no existe
         doNothing().when(clienteServiceMock).agregarCuenta(cuentaValida, 12345678); // Simula que el cliente no tiene una cuenta de ese tipo y moneda
