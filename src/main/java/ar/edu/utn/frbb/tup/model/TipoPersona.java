@@ -2,8 +2,8 @@ package ar.edu.utn.frbb.tup.model;
 
 public enum TipoPersona {
 
-    PERSONA_FISICA("F"),
-    PERSONA_JURIDICA("J");
+    PERSONA_FISICA("FISICA"),
+    PERSONA_JURIDICA("JURIDICA");
 
     private final String descripcion;
 

@@ -34,7 +34,7 @@ public class ClienteService {
 
     public void agregarCuenta(Cuenta cuenta, long dniTitular) throws TipoCuentaAlreadyExistsException {
         Cliente titular = buscarClientePorDni(dniTitular);
-        cuenta.setTitular(titular);
+        cuenta.setTitular(titular.getDni());
         if (titular.tieneCuenta(cuenta.getTipoCuenta(), cuenta.getMoneda())) {
             throw new TipoCuentaAlreadyExistsException("El cliente ya posee una cuenta de ese tipo y moneda");
         }
