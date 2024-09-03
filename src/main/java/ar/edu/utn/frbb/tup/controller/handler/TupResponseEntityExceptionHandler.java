@@ -1,5 +1,6 @@
 package ar.edu.utn.frbb.tup.controller.handler;
 
+import ar.edu.utn.frbb.tup.model.exception.ClienteAlreadyExistsException;
 import ar.edu.utn.frbb.tup.model.exception.TipoCuentaAlreadyExistsException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,16 +26,24 @@ public class TupResponseEntityExceptionHandler extends ResponseEntityExceptionHa
                 new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
-    @ExceptionHandler(value
-            = { IllegalStateException.class })
+    @ExceptionHandler(value = { IllegalStateException.class })
     protected ResponseEntity<Object> handleConflict(
             RuntimeException ex, WebRequest request) {
         String exceptionMessage = ex.getMessage();
         CustomApiError error = new CustomApiError();
-        error.setErrorCode(1234);
+        error.setErrorCode(12354);
         error.setErrorMessage(exceptionMessage);
         return handleExceptionInternal(ex, error,
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler(ClienteAlreadyExistsException.class)
+    protected ResponseEntity<Object> handleClienteAlreadyExists(
+            ClienteAlreadyExistsException ex, WebRequest request) {
+        CustomApiError error = new CustomApiError();
+        error.setErrorMessage(ex.getMessage());
+        return handleExceptionInternal(ex, error,
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
 

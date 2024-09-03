@@ -20,9 +20,8 @@ public class ClienteController {
     @Autowired
     private ClienteValidator clienteValidator;
 
-
     @PostMapping
-    public Cliente crearCliente(@RequestBody ClienteDto clienteDto) throws ClienteAlreadyExistsException {
+    public Cliente crearCliente(@RequestBody ClienteDto clienteDto) {
         clienteValidator.validate(clienteDto);
         return clienteService.darDeAltaCliente(clienteDto);
     }
