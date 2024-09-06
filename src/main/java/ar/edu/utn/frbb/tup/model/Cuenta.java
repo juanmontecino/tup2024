@@ -7,11 +7,11 @@ import ar.edu.utn.frbb.tup.controller.CuentaDto;
 
 public class Cuenta {
     private long numeroCuenta;
-    LocalDateTime fechaCreacion;
-    int balance;
-    TipoCuenta tipoCuenta;
-    long dniTitular;
-    TipoMoneda moneda;
+    private LocalDateTime fechaCreacion;
+    private int balance;
+    private TipoCuenta tipoCuenta;
+    private long dniTitular;
+    private TipoMoneda moneda;
 
     public Cuenta() {
         this.numeroCuenta = new Random().nextLong();
@@ -19,12 +19,11 @@ public class Cuenta {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    public Cuenta(CuentaDto cuentaDto){
+    public Cuenta(CuentaDto cuentaDto) {
+        this();
         this.tipoCuenta = TipoCuenta.fromString(cuentaDto.getTipoCuenta());
         this.moneda = TipoMoneda.fromString(cuentaDto.getMoneda());
-        this.fechaCreacion = LocalDateTime.now();
-        this.balance = 0;
-        this.numeroCuenta = new Random().nextLong();
+        this.dniTitular = cuentaDto.getDniTitular();
     }
 
     public TipoCuenta getTipoCuenta() {

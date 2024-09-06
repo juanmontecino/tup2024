@@ -30,7 +30,7 @@ public class CuentaService {
         }
 
         if (!tipoCuentaEstaSoportada(cuenta)) {
-            throw new TipoCuentaNoSoportadaException("El tipo de cuenta " + cuenta.getTipoCuenta() + " no está soportado.");
+            throw new TipoCuentaNoSoportadaException("El tipo de cuenta " + cuenta.getTipoCuenta() + " en " + cuenta.getMoneda() +  " no está soportado.");
         }
 
         clienteService.agregarCuenta(cuenta, cuentaDto.getDniTitular());
@@ -44,6 +44,9 @@ public class CuentaService {
     }
 
     public Cuenta find(long id) {
+        if (cuentaDao.find(id) == null) {
+            throw new IllegalArgumentException("La cuenta no existe");
+        }
         return cuentaDao.find(id);
     }
 }

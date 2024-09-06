@@ -2,6 +2,7 @@ package ar.edu.utn.frbb.tup.controller.handler;
 
 import ar.edu.utn.frbb.tup.model.exception.ClienteAlreadyExistsException;
 import ar.edu.utn.frbb.tup.model.exception.TipoCuentaAlreadyExistsException;
+import ar.edu.utn.frbb.tup.model.exception.TipoCuentaNoSoportadaException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -40,6 +41,15 @@ public class TupResponseEntityExceptionHandler extends ResponseEntityExceptionHa
     @ExceptionHandler(ClienteAlreadyExistsException.class)
     protected ResponseEntity<Object> handleClienteAlreadyExists(
             ClienteAlreadyExistsException ex, WebRequest request) {
+        CustomApiError error = new CustomApiError();
+        error.setErrorMessage(ex.getMessage());
+        return handleExceptionInternal(ex, error,
+                new HttpHeaders(), HttpStatus.CONFLICT, request);
+    }
+
+    @ExceptionHandler(TipoCuentaNoSoportadaException.class)
+    protected ResponseEntity<Object> handleClienteAlreadyExists(
+            TipoCuentaNoSoportadaException ex, WebRequest request) {
         CustomApiError error = new CustomApiError();
         error.setErrorMessage(ex.getMessage());
         return handleExceptionInternal(ex, error,
