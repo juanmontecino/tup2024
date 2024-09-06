@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.util.Random;
 
 import ar.edu.utn.frbb.tup.controller.CuentaDto;
+import ar.edu.utn.frbb.tup.model.exception.CantidadNegativaException;
+import ar.edu.utn.frbb.tup.model.exception.NoAlcanzaException;
 
 public class Cuenta {
     private long numeroCuenta;
     private LocalDateTime fechaCreacion;
-    private int balance;
+    private long balance;
     private TipoCuenta tipoCuenta;
     private long dniTitular;
     private TipoMoneda moneda;
@@ -44,7 +46,6 @@ public class Cuenta {
         return this;
     }
 
-
     public LocalDateTime getFechaCreacion() {
         return fechaCreacion;
     }
@@ -54,11 +55,11 @@ public class Cuenta {
         return this;
     }
 
-    public int getBalance() {
+    public long getBalance() {
         return balance;
     }
 
-    public Cuenta setBalance(int balance) {
+    public Cuenta setBalance(long balance) {
         this.balance = balance;
         return this;
     }

@@ -11,7 +11,7 @@ import ar.edu.utn.frbb.tup.model.exception.TipoCuentaNoSoportadaException;
 import ar.edu.utn.frbb.tup.service.CuentaService;
 
 @RestController
-@RequestMapping("/cuenta")
+@RequestMapping("/api/cuenta")
 public class CuentaController {
 
     @Autowired

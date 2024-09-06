@@ -14,6 +14,7 @@ public class Cliente extends Persona{
     private String banco;
     private LocalDate fechaAlta;
     private Set<Cuenta> cuentas = new HashSet<>();
+    private Set<Prestamo> prestamos = new HashSet<>();
 
     public Cliente() {
         super();
@@ -67,6 +68,25 @@ public class Cliente extends Persona{
             }
         }
         return false;
+    }
+
+    public boolean tieneCuentaMoneda(TipoMoneda moneda) {
+        for (Cuenta cuenta:
+                cuentas) {
+            if (moneda.equals(cuenta.getMoneda())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Set<Prestamo> getPrestamos() {
+        return prestamos;
+    }
+
+    public void addPrestamo(Prestamo prestamo) {
+        this.prestamos.add(prestamo);
+        prestamo.setNumeroCliente(prestamo.getNumeroCliente());
     }
 
     @Override

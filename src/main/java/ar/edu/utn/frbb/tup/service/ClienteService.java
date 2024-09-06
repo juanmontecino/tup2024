@@ -4,6 +4,7 @@ import ar.edu.utn.frbb.tup.controller.ClienteDto;
 import ar.edu.utn.frbb.tup.model.Cliente;
 import ar.edu.utn.frbb.tup.model.Cuenta;
 
+import ar.edu.utn.frbb.tup.model.Prestamo;
 import ar.edu.utn.frbb.tup.model.exception.ClienteAlreadyExistsException;
 import ar.edu.utn.frbb.tup.model.exception.TipoCuentaAlreadyExistsException;
 import ar.edu.utn.frbb.tup.persistence.ClienteDao;
@@ -39,7 +40,20 @@ public class ClienteService {
         if (titular.tieneCuenta(cuenta.getTipoCuenta(), cuenta.getMoneda())) {
             throw new TipoCuentaAlreadyExistsException("El cliente ya posee una cuenta de ese tipo y moneda");
         }
+        if (titular.tieneCuentaMoneda(cuenta.getMoneda())) {
+            throw new IllegalArgumentException("El cliente ya posee una cuenta de esa moneda");
+        }
         titular.addCuenta(cuenta);
+        clienteDao.save(titular);
+    }
+
+    public void agregarPrestamo (Prestamo prestamo, long dniTitular) {
+        Cliente titular = buscarClientePorDni(dniTitular);
+        prestamo.setNumeroCliente(titular.getDni());
+        if (!titular.tieneCuentaMoneda(prestamo.getMoneda())) {
+            throw new IllegalArgumentException("El cliente no posee una cuenta de esa moneda");
+        }
+        titular.addPrestamo(prestamo);
         clienteDao.save(titular);
     }
 

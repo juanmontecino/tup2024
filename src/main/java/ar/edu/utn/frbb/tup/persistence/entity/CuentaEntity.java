@@ -1,17 +1,15 @@
 package ar.edu.utn.frbb.tup.persistence.entity;
 
-import ar.edu.utn.frbb.tup.model.Cliente;
 import ar.edu.utn.frbb.tup.model.Cuenta;
 import ar.edu.utn.frbb.tup.model.TipoCuenta;
 import ar.edu.utn.frbb.tup.model.TipoMoneda;
-import ar.edu.utn.frbb.tup.persistence.ClienteDao;
 
 import java.time.LocalDateTime;
 
 public class CuentaEntity extends BaseEntity{
     private String nombre;
     private LocalDateTime fechaCreacion;
-    private int balance;
+    private long balance;
     private String tipoCuenta;
     private Long titular;
     private long numeroCuenta;
@@ -54,11 +52,11 @@ public class CuentaEntity extends BaseEntity{
         this.fechaCreacion = fechaCreacion;
     }
 
-    public int getBalance() {
+    public long getBalance() {
         return balance;
     }
 
-    public void setBalance(int balance) {
+    public void setBalance(long balance) {
         this.balance = balance;
     }
 
@@ -84,5 +82,13 @@ public class CuentaEntity extends BaseEntity{
 
     public void setNumeroCuenta(long numeroCuenta) {
         this.numeroCuenta = numeroCuenta;
+    }
+
+    public String getMoneda() {
+        return moneda;
+    }
+
+    public void setMoneda(String moneda) {
+        this.moneda = moneda;
     }
 }
