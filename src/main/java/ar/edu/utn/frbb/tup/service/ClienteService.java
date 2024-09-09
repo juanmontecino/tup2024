@@ -22,7 +22,7 @@ public class ClienteService {
         this.clienteDao = clienteDao;
     }
 
-    public Cliente darDeAltaCliente(ClienteDto clienteDto) throws Exception {
+    public Cliente darDeAltaCliente(ClienteDto clienteDto) throws ClienteAlreadyExistsException, ClienteMenorDeEdadException {
         Cliente cliente = new Cliente(clienteDto);
 
         if (clienteDao.find(cliente.getDni(), false) != null) {
@@ -37,7 +37,7 @@ public class ClienteService {
         return cliente;
     }
 
-    public void agregarCuenta(Cuenta cuenta, long dniTitular) throws Exception {
+    public void agregarCuenta(Cuenta cuenta, long dniTitular) throws TipoCuentaAlreadyExistsException, ClienteNotFoundException {
         Cliente titular = buscarClientePorDni(dniTitular);
         cuenta.setTitular(titular.getDni());
         if (titular.tieneCuenta(cuenta.getTipoCuenta(), cuenta.getMoneda())) {
@@ -50,7 +50,7 @@ public class ClienteService {
         clienteDao.save(titular);
     }
 
-    public void agregarPrestamo (Prestamo prestamo, long dniTitular) throws Exception {
+    public void agregarPrestamo (Prestamo prestamo, long dniTitular) throws ClienteNotFoundException, CuentaNotFoundException {
         Cliente titular = buscarClientePorDni(dniTitular);
         prestamo.setNumeroCliente(titular.getDni());
         if (!titular.tieneCuentaMoneda(prestamo.getMoneda())) {
@@ -60,7 +60,7 @@ public class ClienteService {
         clienteDao.save(titular);
     }
 
-    public Cliente buscarClientePorDni(long dni) throws Exception {
+    public Cliente buscarClientePorDni(long dni) throws ClienteNotFoundException {
         Cliente cliente = clienteDao.find(dni, true);
         if(cliente == null) {
             throw new ClienteNotFoundException("El cliente no existe");

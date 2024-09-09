@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class PrestamoValidator {
 
-    public void validate(PrestamoDto prestamoDto) throws Exception {
+    public void validate(PrestamoDto prestamoDto) throws TipoMonedaNoSoportadaException {
         if ((!"P".equals(prestamoDto.getMoneda()) && !"D".equals(prestamoDto.getMoneda()))) {
             throw new TipoMonedaNoSoportadaException("El tipo de moneda no es correcto o es nulo");
         }

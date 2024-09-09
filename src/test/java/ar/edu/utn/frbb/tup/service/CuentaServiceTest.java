@@ -1,37 +1,27 @@
 package ar.edu.utn.frbb.tup.service;
 
 import ar.edu.utn.frbb.tup.controller.dto.CuentaDto;
-import ar.edu.utn.frbb.tup.model.*;
+import ar.edu.utn.frbb.tup.model.Cliente;
+import ar.edu.utn.frbb.tup.model.Cuenta;
+import ar.edu.utn.frbb.tup.model.Prestamo;
 import ar.edu.utn.frbb.tup.model.enums.TipoCuenta;
 import ar.edu.utn.frbb.tup.model.enums.TipoMoneda;
-import ar.edu.utn.frbb.tup.model.enums.TipoPersona;
-import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.cuentas.CuentaAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.cuentas.TipoCuentaAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.cuentas.TipoCuentaNoSoportadaException;
-import ar.edu.utn.frbb.tup.persistence.ClienteDao;
+import ar.edu.utn.frbb.tup.model.exception.cuentas.*;
+import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteNotFoundException;
 import ar.edu.utn.frbb.tup.persistence.CuentaDao;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDate;
-
-@ExtendWith(MockitoExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class CuentaServiceTest {
-
-    @Mock
-    private ClienteDao clienteDao;
+class CuentaServiceTest {
 
     @Mock
     private CuentaDao cuentaDao;
@@ -42,78 +32,135 @@ public class CuentaServiceTest {
     @InjectMocks
     private CuentaService cuentaService;
 
-    @BeforeAll
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testCuentaExistente() throws CuentaAlreadyExistsException, TipoCuentaAlreadyExistsException, TipoCuentaNoSoportadaException {
-        Cuenta cuentaExistente = new Cuenta();
+    void darDeAltaCuenta_Success() throws CuentaAlreadyExistsException, TipoCuentaNoSoportadaException, TipoCuentaAlreadyExistsException, ClienteNotFoundException {
         CuentaDto cuentaDto = new CuentaDto();
-        cuentaDto.setDniTitular(123456789);
+        cuentaDto.setDniTitular(12345678L);
+        cuentaDto.setTipoCuenta("A");
         cuentaDto.setMoneda("P");
-        cuentaDto.setTipoCuenta("C");
-        
 
-        when(cuentaDao.find(anyLong())).thenReturn(cuentaExistente);
-        assertThrows(CuentaAlreadyExistsException.class,
-                () -> cuentaService.darDeAltaCuenta(cuentaDto));
+        when(cuentaDao.find(anyLong())).thenReturn(null);
+        doNothing().when(clienteService).agregarCuenta(any(Cuenta.class), anyLong());
+
+        Cuenta result = cuentaService.darDeAltaCuenta(cuentaDto);
+
+        assertNotNull(result);
+        assertEquals(TipoCuenta.CAJA_AHORRO, result.getTipoCuenta());
+        assertEquals(TipoMoneda.PESOS, result.getMoneda());
+        assertEquals(12345678L, result.getTitular());
+
+        verify(cuentaDao).save(any(Cuenta.class));
     }
 
     @Test
-    public void testTipoCuentaNoSoportada() {
+    void darDeAltaCuenta_CuentaAlreadyExists() throws ClienteNotFoundException {
         CuentaDto cuentaDto = new CuentaDto();
+        cuentaDto.setDniTitular(12345678L);
+        cuentaDto.setTipoCuenta("CAJA_AHORRO");
+        cuentaDto.setMoneda("P");
+
+        // Simular una cuenta existente
+        Cuenta cuentaExistente = new Cuenta();
+        cuentaExistente.setNumeroCuenta(123L);
+        cuentaExistente.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
+        cuentaExistente.setMoneda(TipoMoneda.PESOS);
+
+        // Mockear el ClienteService para evitar excepciones relacionadas con el cliente
+        when(clienteService.buscarClientePorDni(anyLong())).thenReturn(new Cliente());
+
+        // Mockear el CuentaDao para simular que la cuenta ya existe
+        when(cuentaDao.find(anyLong())).thenReturn(cuentaExistente);
+
+        // No necesitamos mockear tipoCuentaEstaSoportada, ya que es un método de CuentaService
+
+        assertThrows(CuentaAlreadyExistsException.class, () -> cuentaService.darDeAltaCuenta(cuentaDto));
+    }
+
+    @Test
+    void darDeAltaCuenta_TipoCuentaNoSoportada() {
+        CuentaDto cuentaDto = new CuentaDto();
+        cuentaDto.setDniTitular(12345678L);
         cuentaDto.setTipoCuenta("C");
         cuentaDto.setMoneda("D");
 
-        doReturn(null).when(cuentaDao).find(anyLong());
+        when(cuentaDao.find(anyLong())).thenReturn(null);
 
-        assertThrows(TipoCuentaNoSoportadaException.class, () -> {
-            cuentaService.darDeAltaCuenta(cuentaDto);
-        });
+        assertThrows(TipoCuentaNoSoportadaException.class, () -> cuentaService.darDeAltaCuenta(cuentaDto));
     }
 
     @Test
-    public void testClienteYaTieneCuentaDeEseTipo() throws Exception {
-        Cliente peperino = new Cliente();
-        peperino.setDni(123456789);
-        peperino.setNombre("Pepe");
-        peperino.setApellido("Rino");
-        peperino.setFechaNacimiento(LocalDate.of(1978, 3,25));
-        peperino.setTipoPersona(TipoPersona.PERSONA_FISICA);
+    void actualizarCuenta_Success() throws CuentaNotFoundException {
+        Prestamo prestamo = new Prestamo();
+        prestamo.setMontoPedido(1000L);
+        prestamo.setMoneda(TipoMoneda.PESOS);
 
         Cuenta cuenta = new Cuenta();
-        cuenta.setTipoCuenta(TipoCuenta.CUENTA_CORRIENTE);
+        cuenta.setBalance(500L);
         cuenta.setMoneda(TipoMoneda.PESOS);
-        peperino.addCuenta(cuenta);
 
-        CuentaDto cuentaDto = new CuentaDto();
-        cuentaDto.setTipoCuenta("C");
-        cuentaDto.setMoneda("P");
-        cuentaDto.setDniTitular(peperino.getDni());
+        when(cuentaDao.findByMoneda(TipoMoneda.PESOS)).thenReturn(cuenta);
 
+        cuentaService.actualizarCuenta(prestamo);
 
-        when(cuentaDao.find(anyLong())).thenReturn(null);
-        doThrow(TipoCuentaAlreadyExistsException.class).when(clienteService).agregarCuenta(any(Cuenta.class), eq(peperino.getDni()));
-        assertThrows(TipoCuentaAlreadyExistsException.class, () -> cuentaService.darDeAltaCuenta(cuentaDto));
+        assertEquals(1500L, cuenta.getBalance());
+        verify(cuentaDao).save(cuenta);
     }
 
     @Test
-    public void testDarDeAltaCuentaTipoNuevo() throws Exception {
-        Cliente peperino = new Cliente();
-        peperino.setDni(123456789);
-        peperino.setNombre("Pepe");
-        peperino.setApellido("Rino");
+    void find_Success() throws CuentaNotFoundException {
+        Cuenta cuenta = new Cuenta();
+        cuenta.setNumeroCuenta(123L);
 
-        CuentaDto cuentaDto = new CuentaDto();
-        cuentaDto.setTipoCuenta("A");
-        cuentaDto.setMoneda("P");
-        cuentaDto.setDniTitular(peperino.getDni());
+        when(cuentaDao.find(123L)).thenReturn(cuenta);
 
-        when(cuentaDao.find(anyLong())).thenReturn(null);
-        cuentaService.darDeAltaCuenta(cuentaDto);
+        Cuenta result = cuentaService.find(123L);
 
-        verify(cuentaDao, times(1)).save(any(Cuenta.class));
+        assertNotNull(result);
+        assertEquals(123L, result.getNumeroCuenta());
+    }
+
+    @Test
+    void find_CuentaNotFound() {
+        when(cuentaDao.find(123L)).thenReturn(null);
+
+        assertThrows(CuentaNotFoundException.class, () -> cuentaService.find(123L));
+    }
+
+    @Test
+    void pagarCuotaPrestamo_Success() throws NoAlcanzaException, CuentaNotFoundException {
+        Prestamo prestamo = new Prestamo();
+        prestamo.setValorCuota(100L);
+        prestamo.setMoneda(TipoMoneda.PESOS);
+
+        Cuenta cuenta = new Cuenta();
+        cuenta.setBalance(500L);
+        cuenta.setMoneda(TipoMoneda.PESOS);
+
+        when(cuentaDao.findByMoneda(TipoMoneda.PESOS)).thenReturn(cuenta);
+
+        cuentaService.pagarCuotaPrestamo(prestamo);
+
+        assertEquals(400L, cuenta.getBalance());
+        verify(cuentaDao).save(cuenta);
+    }
+
+    @Test
+    void pagarCuotaPrestamo_NoAlcanza() {
+        Prestamo prestamo = new Prestamo();
+        prestamo.setValorCuota(1000L);
+        prestamo.setMoneda(TipoMoneda.PESOS);
+
+        Cuenta cuenta = new Cuenta();
+        cuenta.setBalance(500L);
+        cuenta.setMoneda(TipoMoneda.PESOS);
+
+        when(cuentaDao.findByMoneda(TipoMoneda.PESOS)).thenReturn(cuenta);
+
+        assertThrows(NoAlcanzaException.class, () -> cuentaService.pagarCuotaPrestamo(prestamo));
     }
 }

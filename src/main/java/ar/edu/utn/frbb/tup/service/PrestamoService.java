@@ -4,6 +4,9 @@ import ar.edu.utn.frbb.tup.controller.dto.PrestamoDto;
 import ar.edu.utn.frbb.tup.model.Prestamo;
 import ar.edu.utn.frbb.tup.model.PrestamoResultado;
 import ar.edu.utn.frbb.tup.model.enums.EstadoPrestamo;
+import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteNotFoundException;
+import ar.edu.utn.frbb.tup.model.exception.cuentas.CuentaNotFoundException;
+import ar.edu.utn.frbb.tup.model.exception.cuentas.NoAlcanzaException;
 import ar.edu.utn.frbb.tup.model.exception.prestamos.PrestamoNotFoundException;
 import ar.edu.utn.frbb.tup.persistence.PrestamoDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +30,7 @@ public class PrestamoService {
     private ScoreCreditService scoreCreditService;
 
 
-    public PrestamoResultado solicitarPrestamo (PrestamoDto prestamoDto) throws  Exception {
+    public PrestamoResultado solicitarPrestamo (PrestamoDto prestamoDto) throws CuentaNotFoundException, ClienteNotFoundException {
         Prestamo prestamo = new Prestamo(prestamoDto);
         if (!scoreCreditService.verifyScore(prestamo.getNumeroCliente())) {
             PrestamoResultado prestamoResultado = new PrestamoResultado();
@@ -46,12 +49,12 @@ public class PrestamoService {
         return prestamoResultado;
         }
 
-        public List<Prestamo> getPrestamosByCliente(long dni) throws  Exception{
+        public List<Prestamo> getPrestamosByCliente(long dni) throws ClienteNotFoundException {
             clienteService.buscarClientePorDni(dni);
             return prestamoDao.getPrestamosByCliente(dni);
         }
 
-        public Prestamo pagarCuota(long id) throws  Exception{
+        public Prestamo pagarCuota(long id) throws PrestamoNotFoundException, NoAlcanzaException, CuentaNotFoundException {
             Prestamo prestamo = prestamoDao.find(id);
             if (prestamo == null) {
                 throw new PrestamoNotFoundException("El prestamo no existe");
@@ -61,5 +64,5 @@ public class PrestamoService {
             prestamoDao.save(prestamo);
             return prestamo;
         }
-    }
+}
 

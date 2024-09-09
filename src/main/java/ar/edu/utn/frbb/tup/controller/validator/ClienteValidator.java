@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Component
 public class ClienteValidator {
-    public void validate(ClienteDto clienteDto) throws Exception {
+    public void validate(ClienteDto clienteDto) throws TipoPersonaErroneoException {
         if (!"F".equals(clienteDto.getTipoPersona()) && !"J".equals(clienteDto.getTipoPersona())) {
             throw new TipoPersonaErroneoException("El tipo de persona no es correcto");
         }

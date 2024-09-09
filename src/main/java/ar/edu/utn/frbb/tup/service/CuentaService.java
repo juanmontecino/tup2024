@@ -5,6 +5,7 @@ import ar.edu.utn.frbb.tup.model.Cuenta;
 import ar.edu.utn.frbb.tup.model.Prestamo;
 import ar.edu.utn.frbb.tup.model.enums.TipoCuenta;
 import ar.edu.utn.frbb.tup.model.enums.TipoMoneda;
+import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteNotFoundException;
 import ar.edu.utn.frbb.tup.model.exception.cuentas.*;
 import ar.edu.utn.frbb.tup.persistence.CuentaDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class CuentaService {
     @Autowired
     private ClienteService clienteService;
 
-    public Cuenta darDeAltaCuenta(CuentaDto cuentaDto) throws Exception {
+    public Cuenta darDeAltaCuenta(CuentaDto cuentaDto) throws CuentaAlreadyExistsException, TipoCuentaNoSoportadaException, TipoCuentaAlreadyExistsException, ClienteNotFoundException {
         Cuenta cuenta = new Cuenta(cuentaDto);
 
         if (cuentaDao.find(cuenta.getNumeroCuenta()) != null) {
@@ -39,27 +40,27 @@ public class CuentaService {
                 (cuenta.getTipoCuenta() == TipoCuenta.CAJA_AHORRO && (cuenta.getMoneda() == TipoMoneda.PESOS || cuenta.getMoneda() == TipoMoneda.DOLARES));
     }
 
-    public void actualizarCuenta(Prestamo prestamo) throws Exception {
+    public void actualizarCuenta(Prestamo prestamo) throws CuentaNotFoundException {
         Cuenta cuenta = findByMoneda(prestamo.getMoneda());
         cuenta.setBalance(cuenta.getBalance() + prestamo.getMontoPedido());
         cuentaDao.save(cuenta);
     }
 
-    public Cuenta find(long id) throws  Exception {
+    public Cuenta find(long id) throws  CuentaNotFoundException {
         if (cuentaDao.find(id) == null) {
             throw new CuentaNotFoundException("La cuenta no existe");
         }
         return cuentaDao.find(id);
     }
 
-    public Cuenta findByMoneda(TipoMoneda moneda) throws Exception {
+    public Cuenta findByMoneda(TipoMoneda moneda) throws CuentaNotFoundException {
         if (cuentaDao.findByMoneda(moneda) == null) {
             throw new CuentaNotFoundException("La cuenta no existe");
         }
         return cuentaDao.findByMoneda(moneda);
     }
 
-    public void  pagarCuotaPrestamo(Prestamo prestamo) throws Exception {
+    public void  pagarCuotaPrestamo(Prestamo prestamo) throws NoAlcanzaException, CuentaNotFoundException {
         Cuenta cuenta = findByMoneda(prestamo.getMoneda());
         if (cuenta.getBalance() < prestamo.getValorCuota()) {
             throw new NoAlcanzaException("No hay suficiente saldo en la cuenta");
