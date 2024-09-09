@@ -3,9 +3,9 @@ package ar.edu.utn.frbb.tup.model;
 import java.time.LocalDateTime;
 import java.util.Random;
 
-import ar.edu.utn.frbb.tup.controller.CuentaDto;
-import ar.edu.utn.frbb.tup.model.exception.CantidadNegativaException;
-import ar.edu.utn.frbb.tup.model.exception.NoAlcanzaException;
+import ar.edu.utn.frbb.tup.controller.dto.CuentaDto;
+import ar.edu.utn.frbb.tup.model.enums.TipoCuenta;
+import ar.edu.utn.frbb.tup.model.enums.TipoMoneda;
 
 public class Cuenta {
     private long numeroCuenta;
@@ -21,7 +21,7 @@ public class Cuenta {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    public Cuenta(CuentaDto cuentaDto) {
+    public Cuenta(CuentaDto cuentaDto){
         this();
         this.tipoCuenta = TipoCuenta.fromString(cuentaDto.getTipoCuenta());
         this.moneda = TipoMoneda.fromString(cuentaDto.getMoneda());
@@ -73,23 +73,8 @@ public class Cuenta {
         return this;
     }
 
-    public void debitarDeCuenta(int cantidadADebitar) throws NoAlcanzaException, CantidadNegativaException {
-        if (cantidadADebitar < 0) {
-            throw new CantidadNegativaException();
-        }
-
-        if (balance < cantidadADebitar) {
-            throw new NoAlcanzaException();
-        }
-        this.balance = this.balance - cantidadADebitar;
-    }
-
     public void setNumeroCuenta(long numeroCuenta) {
         this.numeroCuenta = numeroCuenta;
-    }
-
-    public void forzaDebitoDeCuenta(int i) {
-        this.balance = this.balance - i;
     }
 
     public long getNumeroCuenta() {

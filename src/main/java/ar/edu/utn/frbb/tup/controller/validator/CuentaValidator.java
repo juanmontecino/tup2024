@@ -1,30 +1,29 @@
 package ar.edu.utn.frbb.tup.controller.validator;
-import java.time.LocalDate;
 
+import ar.edu.utn.frbb.tup.model.exception.cuentas.TipoCuentaNoSoportadaException;
+import ar.edu.utn.frbb.tup.model.exception.TipoMonedaNoSoportadaException;
 import org.springframework.stereotype.Component;
 
-import ar.edu.utn.frbb.tup.controller.CuentaDto;
-import ar.edu.utn.frbb.tup.model.Cuenta;
+import ar.edu.utn.frbb.tup.controller.dto.CuentaDto;
 
 
 @Component
 public class CuentaValidator {
 
-    public void validate(CuentaDto cuentaDto) {
+    public void validate(CuentaDto cuentaDto) throws Exception {
         validateTipoCuenta(cuentaDto);
         validateMoneda(cuentaDto);
     }
 
-    private void validateTipoCuenta(CuentaDto cuentaDto) {
+    private void validateTipoCuenta(CuentaDto cuentaDto) throws Exception {
         if (!"C".equals(cuentaDto.getTipoCuenta()) && !"A".equals(cuentaDto.getTipoCuenta())) {
-            throw new IllegalArgumentException("El tipo de cuenta no es correcto");
+            throw new TipoCuentaNoSoportadaException("El tipo de cuenta no es correcto");
         }
     }
 
-    private void validateMoneda(CuentaDto cuentaDto) {
+    private void validateMoneda(CuentaDto cuentaDto) throws Exception {
         if ((!"P".equals(cuentaDto.getMoneda()) && !"D".equals(cuentaDto.getMoneda()))) {
-            throw new IllegalArgumentException("El tipo de moneda no es correcto o es nulo");
-
+            throw new TipoMonedaNoSoportadaException("El tipo de moneda no es correcto o es nulo");
         }
     }
 

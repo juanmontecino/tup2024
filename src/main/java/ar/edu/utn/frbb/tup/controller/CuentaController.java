@@ -1,13 +1,11 @@
 package ar.edu.utn.frbb.tup.controller;
 
+import ar.edu.utn.frbb.tup.controller.dto.CuentaDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import ar.edu.utn.frbb.tup.controller.validator.CuentaValidator;
 import ar.edu.utn.frbb.tup.model.Cuenta;
-import ar.edu.utn.frbb.tup.model.exception.CuentaAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.TipoCuentaAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.TipoCuentaNoSoportadaException;
 import ar.edu.utn.frbb.tup.service.CuentaService;
 
 @RestController
@@ -21,13 +19,13 @@ public class CuentaController {
     private CuentaValidator cuentaValidator;
 
     @PostMapping
-    public Cuenta crearCuenta(@RequestBody CuentaDto cuentaDto) throws TipoCuentaAlreadyExistsException, CuentaAlreadyExistsException, TipoCuentaNoSoportadaException{
+    public Cuenta crearCuenta(@RequestBody CuentaDto cuentaDto) throws Exception {
         cuentaValidator.validate(cuentaDto);
         return cuentaService.darDeAltaCuenta(cuentaDto);
     }
 
     @GetMapping ("/{numeroCuenta}")
-    public Cuenta buscarCuenta(@PathVariable long numeroCuenta) {
+    public Cuenta buscarCuenta(@PathVariable long numeroCuenta) throws Exception {
         return cuentaService.find(numeroCuenta);
     }
 }

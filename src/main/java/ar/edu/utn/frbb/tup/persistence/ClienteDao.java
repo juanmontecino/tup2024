@@ -2,6 +2,7 @@ package ar.edu.utn.frbb.tup.persistence;
 
 import ar.edu.utn.frbb.tup.model.Cliente;
 import ar.edu.utn.frbb.tup.model.Cuenta;
+import ar.edu.utn.frbb.tup.model.Prestamo;
 import ar.edu.utn.frbb.tup.persistence.entity.ClienteEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ public class ClienteDao extends AbstractBaseDao{
     @Autowired
     CuentaDao cuentaDao;
 
+    @Autowired
+    PrestamoDao prestamoDao;
+
     public Cliente find(long dni, boolean loadComplete) {
         if (getInMemoryDatabase().get(dni) == null)
             return null;
@@ -20,6 +24,11 @@ public class ClienteDao extends AbstractBaseDao{
             for (Cuenta cuenta :
                     cuentaDao.getCuentasByCliente(dni)) {
                 cliente.addCuenta(cuenta);
+            }
+
+            for (Prestamo prestamo :
+                    prestamoDao.getPrestamosByCliente(dni)) {
+                cliente.addPrestamo(prestamo);
             }
         }
         return cliente;

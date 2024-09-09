@@ -1,8 +1,11 @@
 package ar.edu.utn.frbb.tup.controller.handler;
 
-import ar.edu.utn.frbb.tup.model.exception.ClienteAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.TipoCuentaAlreadyExistsException;
-import ar.edu.utn.frbb.tup.model.exception.TipoCuentaNoSoportadaException;
+import ar.edu.utn.frbb.tup.model.exception.*;
+import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteAlreadyExistsException;
+import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteMenorDeEdadException;
+import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteNotFoundException;
+import ar.edu.utn.frbb.tup.model.exception.cuentas.*;
+import ar.edu.utn.frbb.tup.model.exception.prestamos.PrestamoNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -18,7 +21,7 @@ public class TupResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
     @ExceptionHandler(value
             = {TipoCuentaAlreadyExistsException.class, IllegalArgumentException.class})
-    protected ResponseEntity<Object> handleMateriaNotFound(
+    protected ResponseEntity<Object> handleBadRequest(
             Exception ex, WebRequest request) {
         String exceptionMessage = ex.getMessage();
         CustomApiError error = new CustomApiError();
@@ -38,25 +41,41 @@ public class TupResponseEntityExceptionHandler extends ResponseEntityExceptionHa
                 new HttpHeaders(), HttpStatus.NOT_FOUND, request);
     }
 
-    @ExceptionHandler(ClienteAlreadyExistsException.class)
-    protected ResponseEntity<Object> handleClienteAlreadyExists(
-            ClienteAlreadyExistsException ex, WebRequest request) {
+    @ExceptionHandler({ClienteAlreadyExistsException.class, CuentaAlreadyExistsException.class})
+    protected ResponseEntity<Object> handleAlreadyExists(
+            Exception ex, WebRequest request) {
         CustomApiError error = new CustomApiError();
         error.setErrorMessage(ex.getMessage());
         return handleExceptionInternal(ex, error,
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler(TipoCuentaNoSoportadaException.class)
-    protected ResponseEntity<Object> handleClienteAlreadyExists(
-            TipoCuentaNoSoportadaException ex, WebRequest request) {
+    @ExceptionHandler({TipoCuentaNoSoportadaException.class, TipoMonedaNoSoportadaException.class})
+    protected ResponseEntity<Object> handleNoSoportada(
+            Exception ex, WebRequest request) {
         CustomApiError error = new CustomApiError();
         error.setErrorMessage(ex.getMessage());
         return handleExceptionInternal(ex, error,
-                new HttpHeaders(), HttpStatus.CONFLICT, request);
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
+    @ExceptionHandler({TipoPersonaErroneoException.class, ClienteMenorDeEdadException.class, NoAlcanzaException.class})
+    protected ResponseEntity<Object> handleBadRequestCustom(
+            Exception ex, WebRequest request) {
+        CustomApiError error = new CustomApiError();
+        error.setErrorMessage(ex.getMessage());
+        return handleExceptionInternal(ex, error,
+                new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 
+    @ExceptionHandler({ClienteNotFoundException.class, CuentaNotFoundException.class, PrestamoNotFoundException.class})
+    protected ResponseEntity<Object> handleNotFound(
+            Exception ex, WebRequest request) {
+        CustomApiError error = new CustomApiError();
+        error.setErrorMessage(ex.getMessage());
+        return handleExceptionInternal(ex, error,
+                new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+    }
 
     @Override
     protected ResponseEntity<Object> handleExceptionInternal(Exception ex, @Nullable Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
@@ -68,5 +87,4 @@ public class TupResponseEntityExceptionHandler extends ResponseEntityExceptionHa
 
         return new ResponseEntity(body, headers, status);
     }
-
 }

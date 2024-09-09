@@ -1,11 +1,12 @@
 package ar.edu.utn.frbb.tup.model;
 
-import ar.edu.utn.frbb.tup.controller.ClienteDto;
+import ar.edu.utn.frbb.tup.controller.dto.ClienteDto;
+import ar.edu.utn.frbb.tup.model.enums.TipoCuenta;
+import ar.edu.utn.frbb.tup.model.enums.TipoMoneda;
+import ar.edu.utn.frbb.tup.model.enums.TipoPersona;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Cliente extends Persona{
