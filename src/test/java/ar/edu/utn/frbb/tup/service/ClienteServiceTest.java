@@ -64,7 +64,7 @@ class ClienteServiceTest {
         clienteDto.setDni(12345678L);
         clienteDto.setNombre("Juan");
         clienteDto.setApellido("Pérez");
-        clienteDto.setFechaNacimiento(LocalDate.now().minusYears(20).toString());
+        clienteDto.setFechaNacimiento("1990-01-01");
         clienteDto.setTipoPersona("F");
         clienteDto.setBanco("BancoTest");
 
@@ -81,7 +81,7 @@ class ClienteServiceTest {
         clienteDto.setDni(12345678L);
         clienteDto.setNombre("Juan");
         clienteDto.setApellido("Pérez");
-        clienteDto.setFechaNacimiento(LocalDate.now().minusYears(17).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        clienteDto.setFechaNacimiento("2010-01-01");
         clienteDto.setTipoPersona("F");
         clienteDto.setBanco("BancoTest");
 

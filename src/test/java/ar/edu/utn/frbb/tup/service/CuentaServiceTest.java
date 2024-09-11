@@ -58,25 +58,13 @@ class CuentaServiceTest {
     }
 
     @Test
-    void darDeAltaCuenta_CuentaAlreadyExists() throws ClienteNotFoundException {
+    void darDeAltaCuenta_CuentaAlreadyExists() {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setDniTitular(12345678L);
-        cuentaDto.setTipoCuenta("CAJA_AHORRO");
+        cuentaDto.setTipoCuenta("A");
         cuentaDto.setMoneda("P");
 
-        // Simular una cuenta existente
-        Cuenta cuentaExistente = new Cuenta();
-        cuentaExistente.setNumeroCuenta(123L);
-        cuentaExistente.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
-        cuentaExistente.setMoneda(TipoMoneda.PESOS);
-
-        // Mockear el ClienteService para evitar excepciones relacionadas con el cliente
-        when(clienteService.buscarClientePorDni(anyLong())).thenReturn(new Cliente());
-
-        // Mockear el CuentaDao para simular que la cuenta ya existe
-        when(cuentaDao.find(anyLong())).thenReturn(cuentaExistente);
-
-        // No necesitamos mockear tipoCuentaEstaSoportada, ya que es un método de CuentaService
+        when(cuentaDao.find(anyLong())).thenReturn(new Cuenta());
 
         assertThrows(CuentaAlreadyExistsException.class, () -> cuentaService.darDeAltaCuenta(cuentaDto));
     }
@@ -92,6 +80,7 @@ class CuentaServiceTest {
 
         assertThrows(TipoCuentaNoSoportadaException.class, () -> cuentaService.darDeAltaCuenta(cuentaDto));
     }
+
 
     @Test
     void actualizarCuenta_Success() throws CuentaNotFoundException {
