@@ -5,6 +5,7 @@ import ar.edu.utn.frbb.tup.model.Prestamo;
 import ar.edu.utn.frbb.tup.controller.validator.PrestamoValidator;
 
 import ar.edu.utn.frbb.tup.model.PrestamoResultado;
+import ar.edu.utn.frbb.tup.model.exception.CampoVacioException;
 import ar.edu.utn.frbb.tup.model.exception.TipoMonedaNoSoportadaException;
 import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteNotFoundException;
 import ar.edu.utn.frbb.tup.model.exception.cuentas.CuentaNotFoundException;
@@ -27,7 +28,7 @@ public class PrestamoController {
     private PrestamoService prestamoService;
 
     @PostMapping
-    public PrestamoResultado crearPrestamo(@RequestBody PrestamoDto prestamodto) throws CuentaNotFoundException, ClienteNotFoundException, TipoMonedaNoSoportadaException {
+    public PrestamoResultado crearPrestamo(@RequestBody PrestamoDto prestamodto) throws CuentaNotFoundException, ClienteNotFoundException, TipoMonedaNoSoportadaException, CampoVacioException {
         prestamoValidator.validate(prestamodto);
         return prestamoService.solicitarPrestamo(prestamodto);
     }

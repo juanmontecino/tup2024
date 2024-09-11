@@ -1,6 +1,7 @@
 package ar.edu.utn.frbb.tup.controller;
 
 import ar.edu.utn.frbb.tup.controller.dto.CuentaDto;
+import ar.edu.utn.frbb.tup.model.exception.CampoVacioException;
 import ar.edu.utn.frbb.tup.model.exception.TipoMonedaNoSoportadaException;
 import ar.edu.utn.frbb.tup.model.exception.clientes.ClienteNotFoundException;
 import ar.edu.utn.frbb.tup.model.exception.cuentas.CuentaAlreadyExistsException;
@@ -25,7 +26,7 @@ public class CuentaController {
     private CuentaValidator cuentaValidator;
 
     @PostMapping
-    public Cuenta crearCuenta(@RequestBody CuentaDto cuentaDto) throws TipoCuentaNoSoportadaException, TipoMonedaNoSoportadaException, TipoCuentaAlreadyExistsException, ClienteNotFoundException, CuentaAlreadyExistsException {
+    public Cuenta crearCuenta(@RequestBody CuentaDto cuentaDto) throws TipoCuentaNoSoportadaException, TipoMonedaNoSoportadaException, TipoCuentaAlreadyExistsException, ClienteNotFoundException, CuentaAlreadyExistsException, CampoVacioException {
         cuentaValidator.validate(cuentaDto);
         return cuentaService.darDeAltaCuenta(cuentaDto);
     }

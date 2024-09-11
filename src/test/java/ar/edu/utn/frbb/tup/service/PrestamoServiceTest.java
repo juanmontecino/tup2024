@@ -152,4 +152,112 @@ class PrestamoServiceTest {
 
         assertThrows(NoAlcanzaException.class, () -> prestamoService.pagarCuota(id));
     }
+
+    @Test
+    void solicitarPrestamo_MonedaDolares() throws CuentaNotFoundException, ClienteNotFoundException {
+        PrestamoDto prestamoDto = new PrestamoDto();
+        prestamoDto.setNumeroCliente(12345678L);
+        prestamoDto.setMontoPrestamo(1000L);
+        prestamoDto.setPlazoMeses(12);
+        prestamoDto.setMoneda("D");
+
+        when(scoreCreditService.verifyScore(12345678L)).thenReturn(true);
+        doNothing().when(clienteService).agregarPrestamo(any(Prestamo.class), anyLong());
+        doNothing().when(cuentaService).actualizarCuenta(any(Prestamo.class));
+
+        PrestamoResultado result = prestamoService.solicitarPrestamo(prestamoDto);
+
+        assertNotNull(result);
+        assertEquals(EstadoPrestamo.APROBADO, result.getEstado());
+        assertEquals("El monto del préstamo fue acreditado en su cuenta", result.getMensaje());
+        assertNotNull(result.getPlanPago());
+        assertEquals(1, result.getPlanPago().getCuotaNro());
+        assertEquals(87.5, result.getPlanPago().getCuotaMonto(), 0.01);
+
+        verify(prestamoDao).save(any(Prestamo.class));
+    }
+
+    @Test
+    void solicitarPrestamo_ClienteNotFound() throws CuentaNotFoundException, ClienteNotFoundException {
+        PrestamoDto prestamoDto = new PrestamoDto();
+        prestamoDto.setNumeroCliente(12345678L);
+        prestamoDto.setMontoPrestamo(1000L);
+        prestamoDto.setPlazoMeses(12);
+        prestamoDto.setMoneda("P");
+
+        when(scoreCreditService.verifyScore(12345678L)).thenReturn(true);
+        doThrow(new ClienteNotFoundException("Cliente no encontrado")).when(clienteService).agregarPrestamo(any(Prestamo.class), anyLong());
+
+        assertThrows(ClienteNotFoundException.class, () -> prestamoService.solicitarPrestamo(prestamoDto));
+    }
+
+    @Test
+    void solicitarPrestamo_CuentaNotFound() throws CuentaNotFoundException, ClienteNotFoundException {
+        PrestamoDto prestamoDto = new PrestamoDto();
+        prestamoDto.setNumeroCliente(12345678L);
+        prestamoDto.setMontoPrestamo(1000L);
+        prestamoDto.setPlazoMeses(12);
+        prestamoDto.setMoneda("P");
+
+        when(scoreCreditService.verifyScore(12345678L)).thenReturn(true);
+        doNothing().when(clienteService).agregarPrestamo(any(Prestamo.class), anyLong());
+        doThrow(new CuentaNotFoundException("Cuenta no encontrada")).when(cuentaService).actualizarCuenta(any(Prestamo.class));
+
+        assertThrows(CuentaNotFoundException.class, () -> prestamoService.solicitarPrestamo(prestamoDto));
+    }
+
+    @Test
+    void getPrestamosByCliente_EmptyList() throws ClienteNotFoundException {
+        long dni = 12345678L;
+
+        when(clienteService.buscarClientePorDni(dni)).thenReturn(null); // Simulamos que el cliente existe
+        when(prestamoDao.getPrestamosByCliente(dni)).thenReturn(Arrays.asList());
+
+        List<Prestamo> result = prestamoService.getPrestamosByCliente(dni);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void pagarCuota_UltimaCuota() throws PrestamoNotFoundException, NoAlcanzaException, CuentaNotFoundException {
+        long id = 1L;
+        Prestamo prestamo = new Prestamo(12345678L, 12, 1000L, TipoMoneda.PESOS);
+        prestamo.setId(id);
+        prestamo.setCuotasPagas(11);
+        prestamo.setSaldoRestante(prestamo.getValorCuota());
+
+        when(prestamoDao.find(id)).thenReturn(prestamo);
+        doNothing().when(cuentaService).pagarCuotaPrestamo(prestamo);
+
+        Prestamo result = prestamoService.pagarCuota(id);
+
+        assertNotNull(result);
+        assertEquals(12, result.getCuotasPagas());
+        assertEquals(0, result.getSaldoRestante());
+        verify(prestamoDao).save(prestamo);
+    }
+
+    @Test
+    void pagarCuota_CuentaNotFound() throws CuentaNotFoundException, NoAlcanzaException {
+        long id = 1L;
+        Prestamo prestamo = new Prestamo(12345678L, 12, 1000L, TipoMoneda.PESOS);
+        prestamo.setId(id);
+
+        when(prestamoDao.find(id)).thenReturn(prestamo);
+        doThrow(new CuentaNotFoundException("Cuenta no encontrada")).when(cuentaService).pagarCuotaPrestamo(prestamo);
+
+        assertThrows(CuentaNotFoundException.class, () -> prestamoService.pagarCuota(id));
+    }
+
+    @Test
+    void solicitarPrestamo_InvalidMoneda() {
+        PrestamoDto prestamoDto = new PrestamoDto();
+        prestamoDto.setNumeroCliente(12345678L);
+        prestamoDto.setMontoPrestamo(1000L);
+        prestamoDto.setPlazoMeses(12);
+        prestamoDto.setMoneda("E"); // Invalid currency
+
+        assertThrows(IllegalArgumentException.class, () -> prestamoService.solicitarPrestamo(prestamoDto));
+    }
 }

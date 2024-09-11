@@ -50,7 +50,7 @@ public class TupResponseEntityExceptionHandler extends ResponseEntityExceptionHa
                 new HttpHeaders(), HttpStatus.CONFLICT, request);
     }
 
-    @ExceptionHandler({TipoCuentaNoSoportadaException.class, TipoMonedaNoSoportadaException.class})
+    @ExceptionHandler({TipoCuentaNoSoportadaException.class, TipoMonedaNoSoportadaException.class, CampoVacioException.class})
     protected ResponseEntity<Object> handleNoSoportada(
             Exception ex, WebRequest request) {
         CustomApiError error = new CustomApiError();

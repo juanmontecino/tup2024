@@ -28,6 +28,12 @@ public class Cuenta {
         this.dniTitular = cuentaDto.getDniTitular();
     }
 
+    public Cuenta (TipoCuenta tipoCuenta, TipoMoneda moneda) {
+        this();
+        this.tipoCuenta = tipoCuenta;
+        this.moneda = moneda;
+    }
+
     public TipoCuenta getTipoCuenta() {
         return tipoCuenta;
     }
