@@ -234,4 +234,87 @@ class ClienteServiceTest {
 
         assertThrows(TipoCuentaAlreadyExistsException.class, () -> clienteService.agregarCuenta(nuevaCuenta, 12345678L));
     }
+
+    @Test
+    void darDeAltaCliente_EdgeCase_17YearsAnd364Days() {
+        ClienteDto clienteDto = new ClienteDto();
+        clienteDto.setDni(12345678L);
+        clienteDto.setNombre("Alice");
+        clienteDto.setApellido("Young");
+        clienteDto.setFechaNacimiento(LocalDate.now().minusYears(18).plusDays(1).toString());
+        clienteDto.setTipoPersona("F");
+        clienteDto.setBanco("Banco Test");
+
+        when(clienteDao.find(12345678L, false)).thenReturn(null);
+
+        assertThrows(ClienteMenorDeEdadException.class, () -> clienteService.darDeAltaCliente(clienteDto));
+    }
+
+    @Test
+    void agregarCuenta_DifferentCurrencySameType() throws TipoCuentaAlreadyExistsException, ClienteNotFoundException {
+        Cliente cliente = new Cliente();
+        cliente.setDni(12345678L);
+        Cuenta cuentaPesos = new Cuenta();
+        cuentaPesos.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
+        cuentaPesos.setMoneda(TipoMoneda.PESOS);
+        cliente.addCuenta(cuentaPesos);
+
+        Cuenta cuentaDolares = new Cuenta();
+        cuentaDolares.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
+        cuentaDolares.setMoneda(TipoMoneda.DOLARES);
+
+        when(clienteDao.find(12345678L, true)).thenReturn(cliente);
+
+        clienteService.agregarCuenta(cuentaDolares, 12345678L);
+
+        assertTrue(cliente.getCuentas().contains(cuentaDolares));
+        verify(clienteDao).save(cliente);
+    }
+
+    @Test
+    void agregarPrestamo_MultipleLoans() throws ClienteNotFoundException, CuentaNotFoundException {
+        Cliente cliente = new Cliente();
+        cliente.setDni(12345678L);
+        Cuenta cuenta = new Cuenta();
+        cuenta.setTipoCuenta(TipoCuenta.CAJA_AHORRO);
+        cuenta.setMoneda(TipoMoneda.PESOS);
+        cliente.addCuenta(cuenta);
+
+        Prestamo prestamo1 = new Prestamo();
+        prestamo1.setMoneda(TipoMoneda.PESOS);
+        Prestamo prestamo2 = new Prestamo();
+        prestamo2.setMoneda(TipoMoneda.PESOS);
+
+        when(clienteDao.find(12345678L, true)).thenReturn(cliente);
+
+        clienteService.agregarPrestamo(prestamo1, 12345678L);
+        clienteService.agregarPrestamo(prestamo2, 12345678L);
+
+        assertEquals(2, cliente.getPrestamos().size());
+        assertTrue(cliente.getPrestamos().contains(prestamo1));
+        assertTrue(cliente.getPrestamos().contains(prestamo2));
+        verify(clienteDao, times(2)).save(cliente);
+    }
+
+    @Test
+    void buscarClientePorDni_NonExistentClient() {
+        when(clienteDao.find(99999999L, true)).thenReturn(null);
+
+        assertThrows(ClienteNotFoundException.class, () -> clienteService.buscarClientePorDni(99999999L));
+    }
+
+    @Test
+    void agregarCuenta_MaximumAccountsReached() {
+        Cliente cliente = new Cliente();
+        cliente.setDni(12345678L);
+        cliente.addCuenta(new Cuenta(TipoCuenta.CAJA_AHORRO, TipoMoneda.PESOS));
+        cliente.addCuenta(new Cuenta(TipoCuenta.CUENTA_CORRIENTE, TipoMoneda.PESOS));
+        cliente.addCuenta(new Cuenta(TipoCuenta.CAJA_AHORRO, TipoMoneda.DOLARES));
+
+        Cuenta nuevaCuenta = new Cuenta(TipoCuenta.CUENTA_CORRIENTE, TipoMoneda.DOLARES);
+
+        when(clienteDao.find(12345678L, true)).thenReturn(cliente);
+
+        assertThrows(TipoCuentaAlreadyExistsException.class, () -> clienteService.agregarCuenta(nuevaCuenta, 12345678L));
+    }
 }
