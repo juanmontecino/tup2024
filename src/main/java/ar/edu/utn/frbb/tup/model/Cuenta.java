@@ -22,14 +22,12 @@ public class Cuenta {
     }
 
     public Cuenta(CuentaDto cuentaDto){
-        this();
         this.tipoCuenta = TipoCuenta.fromString(cuentaDto.getTipoCuenta());
         this.moneda = TipoMoneda.fromString(cuentaDto.getMoneda());
         this.dniTitular = cuentaDto.getDniTitular();
     }
 
     public Cuenta (TipoCuenta tipoCuenta, TipoMoneda moneda) {
-        this();
         this.tipoCuenta = tipoCuenta;
         this.moneda = moneda;
     }

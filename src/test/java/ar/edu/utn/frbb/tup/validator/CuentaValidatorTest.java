@@ -5,75 +5,115 @@ import ar.edu.utn.frbb.tup.controller.validator.CuentaValidator;
 import ar.edu.utn.frbb.tup.model.exception.CampoVacioException;
 import ar.edu.utn.frbb.tup.model.exception.cuentas.TipoCuentaNoSoportadaException;
 import ar.edu.utn.frbb.tup.model.exception.TipoMonedaNoSoportadaException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 public class CuentaValidatorTest {
 
+    @Mock
+    private CuentaValidator cuentaValidator;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
+
     @Test
-    public void validateDatosCompletosTestSuccess() {
+    public void validateDatosCompletosTestSuccess() throws CampoVacioException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setTipoCuenta("C");
         cuentaDto.setMoneda("P");
         cuentaDto.setDniTitular(12345678L);
-        assertDoesNotThrow(() -> new CuentaValidator().validateDatosCompletos(cuentaDto));
+
+        doNothing().when(cuentaValidator).validateDatosCompletos(cuentaDto);
+        assertDoesNotThrow(() -> cuentaValidator.validateDatosCompletos(cuentaDto));
+        verify(cuentaValidator).validateDatosCompletos(cuentaDto);
     }
 
     @Test
-    public void validateTipoCuentaTestSuccess() {
+    public void validateTipoCuentaTestSuccess() throws TipoCuentaNoSoportadaException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setTipoCuenta("C");
-        assertDoesNotThrow(() -> new CuentaValidator().validateTipoCuenta(cuentaDto));
+
+        doNothing().when(cuentaValidator).validateTipoCuenta(cuentaDto);
+        assertDoesNotThrow(() -> cuentaValidator.validateTipoCuenta(cuentaDto));
+        verify(cuentaValidator).validateTipoCuenta(cuentaDto);
     }
 
     @Test
-    public void validateMonedaTestSuccess() {
+    public void validateMonedaTestSuccess() throws TipoMonedaNoSoportadaException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setMoneda("P");
-        assertDoesNotThrow(() -> new CuentaValidator().validateMoneda(cuentaDto));
+
+        doNothing().when(cuentaValidator).validateMoneda(cuentaDto);
+        assertDoesNotThrow(() -> cuentaValidator.validateMoneda(cuentaDto));
+        verify(cuentaValidator).validateMoneda(cuentaDto);
     }
 
     @Test
-    public void validateTestSuccess() {
+    public void validateTestSuccess() throws TipoCuentaNoSoportadaException, TipoMonedaNoSoportadaException, CampoVacioException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setTipoCuenta("C");
         cuentaDto.setMoneda("P");
         cuentaDto.setDniTitular(12345678L);
-        assertDoesNotThrow(() -> new CuentaValidator().validate(cuentaDto));
+
+        doNothing().when(cuentaValidator).validate(cuentaDto);
+        assertDoesNotThrow(() -> cuentaValidator.validate(cuentaDto));
+        verify(cuentaValidator).validate(cuentaDto);
     }
 
     @Test
-    public void validateDatosCompletosTestFail() {
+    public void validateDatosCompletosTestFail() throws CampoVacioException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setTipoCuenta("C");
         cuentaDto.setMoneda("P");
-        assertThrows(CampoVacioException.class, () -> new CuentaValidator().validateDatosCompletos(cuentaDto));
+
+        doThrow(new CampoVacioException("Campo vacío")).when(cuentaValidator).validateDatosCompletos(cuentaDto);
+        assertThrows(CampoVacioException.class, () -> cuentaValidator.validateDatosCompletos(cuentaDto));
+        verify(cuentaValidator).validateDatosCompletos(cuentaDto);
     }
 
     @Test
-    public void validateTipoCuentaTestFail() {
+    public void validateTipoCuentaTestFail() throws TipoCuentaNoSoportadaException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setTipoCuenta("X");
-        assertThrows(TipoCuentaNoSoportadaException.class, () -> new CuentaValidator().validateTipoCuenta(cuentaDto));
+
+        doThrow(new TipoCuentaNoSoportadaException("Tipo de cuenta no soportada")).when(cuentaValidator).validateTipoCuenta(cuentaDto);
+        assertThrows(TipoCuentaNoSoportadaException.class, () -> cuentaValidator.validateTipoCuenta(cuentaDto));
+        verify(cuentaValidator).validateTipoCuenta(cuentaDto);
     }
 
     @Test
-    public void validateMonedaTestFail() {
+    public void validateMonedaTestFail() throws TipoMonedaNoSoportadaException {
         CuentaDto cuentaDto = new CuentaDto();
         cuentaDto.setMoneda("E");
-        assertThrows(TipoMonedaNoSoportadaException.class, () -> new CuentaValidator().validateMoneda(cuentaDto));
+
+        doThrow(new TipoMonedaNoSoportadaException("Tipo de moneda no soportada")).when(cuentaValidator).validateMoneda(cuentaDto);
+        assertThrows(TipoMonedaNoSoportadaException.class, () -> cuentaValidator.validateMoneda(cuentaDto));
+        verify(cuentaValidator).validateMoneda(cuentaDto);
     }
 
     @Test
-    public void validateTestFail() {
+    public void validateTestFail() throws TipoCuentaNoSoportadaException, TipoMonedaNoSoportadaException, CampoVacioException {
         CuentaDto cuentaDto = new CuentaDto();
-        assertThrows(CampoVacioException.class, () -> new CuentaValidator().validate(cuentaDto));
 
-        cuentaDto.setTipoCuenta("X");
-        cuentaDto.setMoneda("E");
-        cuentaDto.setDniTitular(12345678L);
-        assertThrows(TipoCuentaNoSoportadaException.class, () -> new CuentaValidator().validate(cuentaDto));
+        doThrow(new CampoVacioException("Campo vacío")).when(cuentaValidator).validate(cuentaDto);
+        assertThrows(CampoVacioException.class, () -> cuentaValidator.validate(cuentaDto));
+        verify(cuentaValidator).validate(cuentaDto);
+
+        CuentaDto cuentaDto2 = new CuentaDto();
+        cuentaDto2.setTipoCuenta("X");
+        cuentaDto2.setMoneda("E");
+        cuentaDto2.setDniTitular(12345678L);
+
+        doThrow(new TipoCuentaNoSoportadaException("Tipo de cuenta no soportada")).when(cuentaValidator).validate(cuentaDto2);
+        assertThrows(TipoCuentaNoSoportadaException.class, () -> cuentaValidator.validate(cuentaDto2));
+        verify(cuentaValidator, times(2)).validate(any(CuentaDto.class));
     }
 }
