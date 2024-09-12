@@ -1,7 +1,13 @@
 package ar.edu.utn.frbb.tup.controller.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "Datos para crear o actualizar un cliente")
 public class ClienteDto extends PersonaDto {
+    @Schema(description = "Tipo de persona (FISICA o JURIDICA)", example = "F")
     private String tipoPersona;
+
+    @Schema(description = "Nombre del banco", example = "Banco de la Nación Argentina")
     private String banco;
 
     public String getTipoPersona() {
